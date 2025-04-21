@@ -1,0 +1,117 @@
+﻿<Page x:Class="restaurent_hamhamma.Pages.ReservationPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:restaurent_hamhamma.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="Réservation - Restaurant Hamhamma">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- En-tête -->
+        <Border Grid.Row="0" Background="#FF4D2D" Padding="15">
+            <TextBlock Text="Réserver une Table" FontSize="24" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
+        </Border>
+
+        <!-- Formulaire de réservation -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="40,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Information de réservation - colonne de gauche -->
+                <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,20,0">
+                    <TextBlock Text="Vos coordonnées" FontSize="18" FontWeight="Bold" Foreground="#FF4D2D" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Nom et prénom" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtNom" Height="30" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Numéro de téléphone" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtTelephone" Height="30" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Nombre de personnes" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="cmbPersonnes" Height="30" Margin="0,0,0,15">
+                        <ComboBoxItem Content="1 personne"/>
+                        <ComboBoxItem Content="2 personnes" IsSelected="True"/>
+                        <ComboBoxItem Content="3 personnes"/>
+                        <ComboBoxItem Content="4 personnes"/>
+                        <ComboBoxItem Content="5 personnes"/>
+                        <ComboBoxItem Content="6 personnes"/>
+                        <ComboBoxItem Content="7 personnes"/>
+                        <ComboBoxItem Content="8 personnes"/>
+                        <ComboBoxItem Content="9 personnes"/>
+                        <ComboBoxItem Content="10 personnes"/>
+                        <ComboBoxItem Content="Plus de 10 personnes"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Information de réservation - colonne de droite -->
+                <StackPanel Grid.Column="1" Grid.Row="0">
+                    <TextBlock Text="Date et heure" FontSize="18" FontWeight="Bold" Foreground="#FF4D2D" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Date" Margin="0,0,0,5"/>
+                    <DatePicker x:Name="dpDate" Height="30" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Heure" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="cmbHeure" Height="30" Margin="0,0,0,15">
+                        <ComboBoxItem Content="12:00"/>
+                        <ComboBoxItem Content="12:30"/>
+                        <ComboBoxItem Content="13:00"/>
+                        <ComboBoxItem Content="13:30"/>
+                        <ComboBoxItem Content="14:00"/>
+                        <ComboBoxItem Content="19:00"/>
+                        <ComboBoxItem Content="19:30" IsSelected="True"/>
+                        <ComboBoxItem Content="20:00"/>
+                        <ComboBoxItem Content="20:30"/>
+                        <ComboBoxItem Content="21:00"/>
+                        <ComboBoxItem Content="21:30"/>
+                        <ComboBoxItem Content="22:00"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Commentaires -->
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,20,0,0">
+                    <TextBlock Text="Commentaires (allergies, demandes spéciales, etc.)" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtCommentaire" TextWrapping="Wrap" AcceptsReturn="True" Height="80" TextChanged="txtCommentaire_TextChanged"/>
+                </StackPanel>
+
+                <!-- Bouton de validation -->
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="0,30,0,0" HorizontalAlignment="Center">
+                    <Button x:Name="btnReserver" Content="Confirmer la réservation" 
+                            Background="#FFAA53" Foreground="White" FontWeight="Bold"
+                            Padding="20,10" Click="BtnReserver_Click"/>
+                </StackPanel>
+
+                <!-- Message de confirmation -->
+                <Border x:Name="borderConfirmation" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" 
+                        Background="#E1F5E1" BorderBrush="#4CAF50" BorderThickness="1" 
+                        Margin="0,20,0,0" Padding="15" CornerRadius="5" Visibility="Collapsed">
+                    <TextBlock x:Name="txtConfirmation" Text="Votre réservation a été enregistrée avec succès!" 
+                               Foreground="#4CAF50" TextWrapping="Wrap"/>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Pied de page -->
+        <Border Grid.Row="2" Background="#FF4D2D" Padding="10">
+            <TextBlock Text="Pour toute question, contactez-nous au 01 23 45 67 89" 
+                       Foreground="White" HorizontalAlignment="Center"/>
+        </Border>
+    </Grid>
+</Page>
