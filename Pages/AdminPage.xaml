@@ -18,7 +18,7 @@
 
         <!-- En-tête -->
         <Border Grid.Row="0" Background="#FF4D2D" Padding="15">
-            <TextBlock Text="Administration des Réservations" FontSize="24" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBlock Text="Administration" FontSize="24" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
         </Border>
 
         <!-- Filtres -->

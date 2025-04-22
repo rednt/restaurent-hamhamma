@@ -29,7 +29,7 @@ namespace restaurent_hamhamma
 
         private void BtnAdmin_Click(object sender, RoutedEventArgs e)
         {
-            MainFrame.NavigationService.Navigate(new AdminPage());
+            MainFrame.NavigationService.Navigate(new LoginPage());
         }
     }
 }
