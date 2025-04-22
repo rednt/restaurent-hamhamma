@@ -16,6 +16,6 @@ namespace restaurent_hamhamma.Models
 
         // Navigation properties
         public Client Client { get; set; }
-        public MenuItem MenuItem { get; set; }
+        public MenuItemModel MenuItem { get; set; }
     }
 }

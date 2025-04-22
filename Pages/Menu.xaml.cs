@@ -13,12 +13,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using restaurent_hamhamma.Models;
 
 namespace restaurent_hamhamma.Pages
 {
-    /// <summary>
-    /// Interaction logic for Menu.xaml
-    /// </summary>
+    
     public partial class Menu : Page
     {
         public Menu()
@@ -29,6 +28,5 @@ namespace restaurent_hamhamma.Pages
         {
 
         }
-        
     }
 }

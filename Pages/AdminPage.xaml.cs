@@ -41,7 +41,18 @@ namespace restaurent_hamhamma.Pages
 
         private void BtnAjouterMenuItem_Click(object sender, RoutedEventArgs e) 
         {
-            
+            var item = new MenuItemModel
+            {
+
+                Name = txtMenuName.Text,
+                Disponible = chkDisponible.IsChecked == true,
+                Prix = txtMenuPrice.Text != string.Empty ? float.Parse(txtMenuPrice.Text) : 0,
+                Description = txtMenuDescription.Text,
+                ImagePath = txtMenuImagePath.Text
+
+            };
+            MenuItemRepository.Items.Add(item);
+           
         }
         private void ApplyFilters()
         {
@@ -108,7 +119,20 @@ namespace restaurent_hamhamma.Pages
                 }
             }
         }
+        private void BtnSupprimerItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.DataContext is MenuItemModel item)
+            {
+                
+                MenuItemRepository.Items.Remove(item);
+            }
+        }
+        private void BtnModifierItem_Click(object sender, RoutedEventArgs e) 
+        {
+            MessageBox.Show("Modification de l'élément de menu en cours de développement.",
+                "Fonctionnalité à venir", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
 
-        
+
     }
 }

@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:restaurent_hamhamma.Pages"
+      xmlns:models="clr-namespace:restaurent_hamhamma.Models"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="Administration - Restaurant Hamhamma">
@@ -81,6 +82,7 @@
                         <TextBox x:Name="txtMenuDescription" Text="Description" Margin="0,5"/>
                         <TextBox x:Name="txtMenuPrice" Text="Prix" Margin="0,5"/>
                         <TextBox x:Name="txtMenuImagePath" Text="Chemin de l'image" Margin="0,5"/>
+                        <CheckBox x:Name="chkDisponible" Content="Disponible" Margin="0,5"/>
                         <Button Content="Ajouter" Click="BtnAjouterMenuItem_Click" Margin="0,10,0,0" Padding="10,5"/>
                     </StackPanel>
                 </GroupBox>
@@ -88,16 +90,25 @@
                 <!-- Scrollable List of Existing Items -->
                 <GroupBox Header="Éléments existants" Margin="0,10,0,0" Padding="10" Height="250">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel x:Name="MenuItemsListPanel">
-                            <!-- Example item, will be generated dynamically in code-behind -->
-                            <!--
-                    <StackPanel Orientation="Horizontal" Margin="0,5">
-                        <TextBlock Text="Couscous Royal" Width="150"/>
-                        <Button Content="Modifier" Margin="5,0"/>
-                        <Button Content="Supprimer" Margin="5,0"/>
-                    </StackPanel>
-                    -->
-                        </StackPanel>
+                        <ItemsControl ItemsSource="{x:Static models:MenuItemRepository.Items}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" Margin="0,5,0,5">
+                                        <TextBlock 
+                            Text="{Binding Name}" 
+                            FontWeight="Bold"/>
+                                        <TextBlock 
+                            Text="{Binding Description}" 
+                            FontStyle="Italic"
+                            Margin="0,0,0,5"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Modifier" Click="BtnModifierItem_Click" Margin="5,0,0,0"/>
+                                            <Button Content="Supprimer" Click="BtnSupprimerItem_Click" Margin="5,0,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </ScrollViewer>
                 </GroupBox>
 

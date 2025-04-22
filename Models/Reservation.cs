@@ -18,6 +18,6 @@ namespace restaurent_hamhamma.Models
         public DateTime TimeCreated { get; set; }
         public Client Client { get; set; }
         public RestaurantTable Table { get; set; }
-        public ICollection<MenuItem> MenuItems { get; set; }
+        public ICollection<MenuItemModel> MenuItems { get; set; }
     }
 }

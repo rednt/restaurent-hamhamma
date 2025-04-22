@@ -39,6 +39,6 @@ namespace restaurent_hamhamma.Models
         }
 
         // Navigation properties
-        public ICollection<MenuItem> MenuItems { get; set; }
+        public ICollection<MenuItemModel> MenuItems { get; set; }
     }
 }
