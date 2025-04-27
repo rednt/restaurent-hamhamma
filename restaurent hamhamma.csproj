@@ -5,6 +5,7 @@
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
+		<PlatformTarget>x86</PlatformTarget>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -31,6 +32,18 @@
 	  <Resource Include="Pages\logo_1.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </Resource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.8.0" />
+	  <PackageReference Include="System.Data.OracleClient" Version="1.0.8" />
+	  <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="Oracle.ManagedDataAccess">
+	    <HintPath>bin\Debug\net6.0-windows\Oracle.ManagedDataAccess.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>

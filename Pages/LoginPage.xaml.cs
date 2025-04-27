@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Oracle.ManagedDataAccess.Client;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace restaurent_hamhamma.Pages
 {
     public partial class LoginPage : Page
     {
+        OracleConnection conn = new OracleConnection(@"User Id=System;Password=1234;Data Source=localhost:1521/XE;Connection Timeout=30");
+
         public LoginPage()
         {
             InitializeComponent();
@@ -26,17 +19,36 @@ namespace restaurent_hamhamma.Pages
         {
             string username = UsernameTextBox.Text;
             string password = PasswordBox.Password;
-            if (username == "admin" && password == "password")
+            try
             {
-                // Verifification avec la base de données
-                NavigationService.Navigate(new AdminPage());
+                conn.Open();
+
+                string query = "SELECT COUNT(*) FROM admin_tab WHERE username = :username AND pwd = :password";
+
+                OracleCommand cmd = new OracleCommand(query, conn);
+                cmd.Parameters.Add(new OracleParameter("username", username));
+                cmd.Parameters.Add(new OracleParameter("password", password));
+
+                int userCount = Convert.ToInt32(cmd.ExecuteScalar());
+
+                if (userCount > 0)
+                {
+                    NavigationService.Navigate(new AdminPage());
+                    MessageBox.Show("Login successful!");
+                }
+                else
+                {
+                    MessageBox.Show("Invalid username or password.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Identifiants incorrects. Veuillez réessayer. ( Verifification avec la base de données )", "Warning");
-                NavigationService.Navigate(new AdminPage());
+                MessageBox.Show("Error: " + ex.Message);
             }
-            
+            finally
+            {
+                conn.Close();
+            }
         }
     }
 }

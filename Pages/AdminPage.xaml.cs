@@ -124,7 +124,7 @@ namespace restaurent_hamhamma.Pages
             if (sender is Button button && button.DataContext is MenuItemModel item)
             {
                 
-                MenuItemRepository.Items.Remove(item);
+                MenuItemRepository.Items.Remove(item);  
             }
         }
         private void BtnModifierItem_Click(object sender, RoutedEventArgs e) 
