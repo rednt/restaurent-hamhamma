@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:restaurent_hamhamma.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="600" d:DesignWidth="800"
       Title="Réservation - Restaurant Hamhamma">
 
     <Grid>
@@ -17,101 +17,108 @@
 
         <!-- En-tête -->
         <Border Grid.Row="0" Background="#FF4D2D" Padding="15">
-            <TextBlock Text="Réserver une Table" FontSize="24" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBlock Text="Nouvelle Réservation" FontSize="24" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
         </Border>
 
         <!-- Formulaire de réservation -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <Grid Margin="40,20">
+            <Grid Margin="20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
 
-                <!-- Information de réservation - colonne de gauche -->
-                <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,20,0">
-                    <TextBlock Text="Vos coordonnées" FontSize="18" FontWeight="Bold" Foreground="#FF4D2D" Margin="0,0,0,15"/>
+                <!-- Informations du client -->
+                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                    <GroupBox Header="Informations du client" Padding="10" Margin="0,0,0,15">
+                        <StackPanel>
+                            <TextBlock Text="Nom complet:" Margin="0,5"/>
+                            <TextBox x:Name="txtNom" Margin="0,0,0,10"/>
 
-                    <TextBlock Text="Nom et prénom" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtNom" Height="30" Margin="0,0,0,15"/>
+                            <TextBlock Text="Email:" Margin="0,5"/>
+                            <TextBox x:Name="txtEmail" Margin="0,0,0,10"/>
 
-                    <TextBlock Text="Numéro de téléphone" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtTelephone" Height="30" Margin="0,0,0,15"/>
+                            <TextBlock Text="Téléphone:" Margin="0,5"/>
+                            <TextBox x:Name="txtTelephone" Margin="0,0,0,10"/>
+                        </StackPanel>
+                    </GroupBox>
 
-                    <TextBlock Text="Nombre de personnes" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="cmbPersonnes" Height="30" Margin="0,0,0,15">
-                        <ComboBoxItem Content="1 personne"/>
-                        <ComboBoxItem Content="2 personnes" IsSelected="True"/>
-                        <ComboBoxItem Content="3 personnes"/>
-                        <ComboBoxItem Content="4 personnes"/>
-                        <ComboBoxItem Content="5 personnes"/>
-                        <ComboBoxItem Content="6 personnes"/>
-                        <ComboBoxItem Content="7 personnes"/>
-                        <ComboBoxItem Content="8 personnes"/>
-                        <ComboBoxItem Content="9 personnes"/>
-                        <ComboBoxItem Content="10 personnes"/>
-                        <ComboBoxItem Content="Plus de 10 personnes"/>
-                    </ComboBox>
+                    <!-- Détails de la réservation -->
+                    <GroupBox Header="Détails de la réservation" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="Date:" Margin="0,5"/>
+                            <DatePicker x:Name="dpDate" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Heure:" Margin="0,5"/>
+                            <ComboBox x:Name="cmbHeure" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="Nombre de personnes:" Margin="0,5"/>
+                            <ComboBox x:Name="cmbNbPersonnes" Margin="0,0,0,10"/>
+                        </StackPanel>
+                    </GroupBox>
                 </StackPanel>
 
-                <!-- Information de réservation - colonne de droite -->
-                <StackPanel Grid.Column="1" Grid.Row="0">
-                    <TextBlock Text="Date et heure" FontSize="18" FontWeight="Bold" Foreground="#FF4D2D" Margin="0,0,0,15"/>
+                <!-- Choix du menu -->
+                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                    <GroupBox Header="Choisissez un menu" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="Menu disponible:" Margin="0,5"/>
+                            <ListBox x:Name="lbMenuItems" Height="200" SelectionMode="Single" Margin="0,0,0,10">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Description}" FontStyle="Italic"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding Prix, StringFormat={}{0:C}}" 
+                                                       VerticalAlignment="Center" FontWeight="Bold"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
 
-                    <TextBlock Text="Date" Margin="0,0,0,5"/>
-                    <DatePicker x:Name="dpDate" Height="30" Margin="0,0,0,15"/>
+                            
+                        </StackPanel>
+                    </GroupBox>
 
-                    <TextBlock Text="Heure" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="cmbHeure" Height="30" Margin="0,0,0,15">
-                        <ComboBoxItem Content="12:00"/>
-                        <ComboBoxItem Content="12:30"/>
-                        <ComboBoxItem Content="13:00"/>
-                        <ComboBoxItem Content="13:30"/>
-                        <ComboBoxItem Content="14:00"/>
-                        <ComboBoxItem Content="19:00"/>
-                        <ComboBoxItem Content="19:30" IsSelected="True"/>
-                        <ComboBoxItem Content="20:00"/>
-                        <ComboBoxItem Content="20:30"/>
-                        <ComboBoxItem Content="21:00"/>
-                        <ComboBoxItem Content="21:30"/>
-                        <ComboBoxItem Content="22:00"/>
-                    </ComboBox>
+                    <!-- Résumé de la réservation -->
+                    <GroupBox Header="Résumé" Padding="10" Margin="0,15,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Menu sélectionné:" FontWeight="Bold" Margin="0,0,10,5"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="txtSelectedMenu" Text="-" Margin="0,0,0,5"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Date et heure:" FontWeight="Bold" Margin="0,0,10,5"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="txtSelectedDateTime" Text="-" Margin="0,0,0,5"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Personnes:" FontWeight="Bold" Margin="0,0,10,5"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="txtSelectedPersonnes" Text="-" Margin="0,0,0,5"/>
+                        </Grid>
+                    </GroupBox>
                 </StackPanel>
-
-                <!-- Commentaires -->
-                <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,20,0,0">
-                    <TextBlock Text="Commentaires (allergies, demandes spéciales, etc.)" Margin="0,0,0,5"/>
-                    <TextBox x:Name="txtCommentaire" TextWrapping="Wrap" AcceptsReturn="True" Height="80" TextChanged="txtCommentaire_TextChanged"/>
-                </StackPanel>
-
-                <!-- Bouton de validation -->
-                <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="0,30,0,0" HorizontalAlignment="Center">
-                    <Button x:Name="btnReserver" Content="Confirmer la réservation" 
-                            Background="#FFAA53" Foreground="White" FontWeight="Bold"
-                            Padding="20,10" Click="BtnReserver_Click"/>
-                </StackPanel>
-
-                <!-- Message de confirmation -->
-                <Border x:Name="borderConfirmation" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" 
-                        Background="#E1F5E1" BorderBrush="#4CAF50" BorderThickness="1" 
-                        Margin="0,20,0,0" Padding="15" CornerRadius="5" Visibility="Collapsed">
-                    <TextBlock x:Name="txtConfirmation" Text="Votre réservation a été enregistrée avec succès!" 
-                               Foreground="#4CAF50" TextWrapping="Wrap"/>
-                </Border>
             </Grid>
         </ScrollViewer>
 
-        <!-- Pied de page -->
-        <Border Grid.Row="2" Background="#FF4D2D" Padding="10">
-            <TextBlock Text="Pour toute question, contactez-nous au 01 23 45 67 89" 
-                       Foreground="White" HorizontalAlignment="Center"/>
+        <!-- Actions -->
+        <Border Grid.Row="2" Background="#FFAA53" Padding="15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="btnAnnuler" Content="Annuler" Padding="15,5" Margin="0,0,10,0" Click="BtnAnnuler_Click"/>
+                <Button x:Name="btnConfirmer" Content="Confirmer la réservation" Padding="15,5" Margin="10,0,0,0" Click="BtnConfirmer_Click"/>
+            </StackPanel>
         </Border>
     </Grid>
 </Page>

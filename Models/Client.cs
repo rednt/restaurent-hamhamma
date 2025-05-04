@@ -8,6 +8,9 @@ namespace restaurent_hamhamma.Models
 {
     public class Client : User
     {
+        public int ClientID { get; set; }
+        public string Email { get; set; }
+        public string FullName { get; set; }
         public string NumPhone { get; set; }
 
         // Navigation properties

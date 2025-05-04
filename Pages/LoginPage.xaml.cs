@@ -8,7 +8,7 @@ namespace restaurent_hamhamma.Pages
 {
     public partial class LoginPage : Page
     {
-        OracleConnection conn = new OracleConnection(@"User Id=System;Password=1234;Data Source=localhost:1521/XE;Connection Timeout=30");
+        OracleConnection conn = new OracleConnection(@"User Id=Hamhama;Password=1234;Data Source=localhost:1521/XE;Connection Timeout=30");
 
         public LoginPage()
         {

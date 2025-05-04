@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace restaurent_hamhamma.Models
 {
@@ -10,14 +9,16 @@ namespace restaurent_hamhamma.Models
         public string Nom { get; set; }
         public int TableId { get; set; }
         public string Telephone { get; set; }
+        public string Email { get; set; }
         public int nbr_Personnes { get; set; }
         public DateTime Date { get; set; }
-        public TimeSpan Heure { get; set; }
         public string Commentaire { get; set; }
         public string Choix { get; set; }
+        public string ChoixItem { get; set; } // Pour la compatibilité avec le DataGrid
+        public int ID_Reservation { get { return reservation_Id; } } // Pour la compatibilité avec le DataGrid
         public DateTime TimeCreated { get; set; }
-        public Client Client { get; set; }
-        public RestaurantTable Table { get; set; }
+        public int ClientID { get; set; }
+        public RestaurantTable TableID { get; set; }
         public ICollection<MenuItemModel> MenuItems { get; set; }
     }
 }
