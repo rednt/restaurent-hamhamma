@@ -8,12 +8,14 @@ using restaurent_hamhamma.Services;
 using Oracle.ManagedDataAccess.Client;
 using System.Text.RegularExpressions;
 using System.Windows.Data;
+using dotenv.net;
+using System.Diagnostics;
 
 namespace restaurent_hamhamma.Pages
 {
     public partial class ReservationPage : Page
     {
-        private readonly string _connectionString = @"User Id=Hamhama;Password=1234;Data Source=localhost:1521/XE;Connection Timeout=30";
+        private readonly string _connectionString;
         private MenuItemModel _selectedMenuItem;
 
         public ReservationPage()
@@ -21,8 +23,39 @@ namespace restaurent_hamhamma.Pages
             InitializeComponent();
             LoadData();
             SetupEventHandlers();
+            try
+            {
+                // Load environment variables from .env file
+                DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
 
+                // Retrieve environment variables
+                string user = Environment.GetEnvironmentVariable("DB_USER");
+                string password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+                string host = Environment.GetEnvironmentVariable("DB_HOST");
+                string port = Environment.GetEnvironmentVariable("DB_PORT");
+                string service = Environment.GetEnvironmentVariable("DB_SERVICE");
+
+                // Validate the environment variables
+                if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(password) ||
+                    string.IsNullOrEmpty(host) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(service))
+                {
+                    throw new InvalidOperationException("One or more required environment variables are missing.");
+                }
+
+                // Build the connection string using the environment variables
+                _connectionString = $"User Id={user};Password={password};Data Source={host}:{port}/{service};Connection Timeout=30";
+
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error initializing the Admin page: {ex.Message}",
+                    "Initialization Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"Exception in AdminPage constructor: {ex}");
+            }
         }
+
+        
 
         private void LoadData()
         {

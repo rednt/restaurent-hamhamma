@@ -8,13 +8,15 @@ using restaurent_hamhamma.Models;
 using Oracle.ManagedDataAccess.Client;
 using System.Collections.Generic;
 using System.Diagnostics;
+using dotenv.net;
 
 namespace restaurent_hamhamma.Pages
 {
     public partial class AdminPage : Page
     {
-        // Make the connection string consistent throughout the application
-        private readonly string connectionString = @"User Id=Hamhama;Password=1234;Data Source=localhost:1521/XE;Connection Timeout=30";
+        private readonly string _connectionString;
+        private bool isEditMode = false;
+        private Reservation editingReservation = null;
 
         public AdminPage()
         {
@@ -22,6 +24,26 @@ namespace restaurent_hamhamma.Pages
 
             try
             {
+                // Load environment variables from .env file
+                DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+
+                // Retrieve environment variables
+                string user = Environment.GetEnvironmentVariable("DB_USER");
+                string password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+                string host = Environment.GetEnvironmentVariable("DB_HOST");
+                string port = Environment.GetEnvironmentVariable("DB_PORT");
+                string service = Environment.GetEnvironmentVariable("DB_SERVICE");
+
+                // Validate the environment variables
+                if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(password) ||
+                    string.IsNullOrEmpty(host) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(service))
+                {
+                    throw new InvalidOperationException("One or more required environment variables are missing.");
+                }
+
+                // Build the connection string using the environment variables
+                _connectionString = $"User Id={user};Password={password};Data Source={host}:{port}/{service};Connection Timeout=30";
+
                 // Set up direct binding for DataGrid
                 LoadData();
 
@@ -34,6 +56,7 @@ namespace restaurent_hamhamma.Pages
                     "Initialization Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Debug.WriteLine($"Exception in AdminPage constructor: {ex}");
             }
+        
         }
 
         private void SetupFormFields()
@@ -108,7 +131,7 @@ namespace restaurent_hamhamma.Pages
             try
             {
                 Debug.WriteLine("Loading menu items...");
-                using (OracleConnection conn = new OracleConnection(connectionString))
+                using (OracleConnection conn = new OracleConnection(_connectionString))
                 {
                     conn.Open();
                     Debug.WriteLine("Database connection opened");
@@ -237,7 +260,7 @@ namespace restaurent_hamhamma.Pages
 
             try
             {
-                using (OracleConnection conn = new OracleConnection(connectionString))
+                using (OracleConnection conn = new OracleConnection(_connectionString))
                 {
                     conn.Open();
 
@@ -287,6 +310,12 @@ namespace restaurent_hamhamma.Pages
             bool isItemSelected = dgReservations.SelectedItem != null;
             btnModifier.IsEnabled = isItemSelected;
             btnSupprimer.IsEnabled = isItemSelected;
+
+            // If we're in edit mode and selection changes, disable edit mode
+            if (isEditMode && e.AddedItems.Count > 0)
+            {
+                ExitEditMode();
+            }
         }
 
         private void BtnAjouter_Click(object sender, RoutedEventArgs e)
@@ -299,9 +328,97 @@ namespace restaurent_hamhamma.Pages
         {
             if (dgReservations.SelectedItem is Reservation selectedReservation)
             {
-                MessageBox.Show($"Modification de la réservation de {selectedReservation.Nom} en cours de développement.",
-                    "Fonctionnalité à venir", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    // Enable edit mode for the DataGrid
+                    EnterEditMode(selectedReservation);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error enabling edit mode: {ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Debug.WriteLine($"Exception in BtnModifier_Click: {ex}");
+                }
             }
+        }
+
+        private void EnterEditMode(Reservation reservation)
+        {
+            // Save the current reservation for possible rollback
+            editingReservation = reservation;
+
+            // Enable editing in the DataGrid
+            dgReservations.IsReadOnly = false;
+
+            // Make the save button visible and enable it
+            btnSauvegarder.IsEnabled = true;
+
+            // Disable other action buttons during edit
+            btnAjouter.IsEnabled = false;
+            btnModifier.IsEnabled = false;
+            btnSupprimer.IsEnabled = false;
+
+            // Set the flag that we're in edit mode
+            isEditMode = true;
+
+            // Begin edit on the selected item
+            dgReservations.BeginEdit();
+
+            MessageBox.Show("Vous pouvez maintenant modifier les champs directement dans la grille. " +
+                          "Cliquez sur 'Sauvegarder' quand vous avez terminé.",
+                          "Mode Édition", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void ExitEditMode()
+        {
+            // Disable editing in the DataGrid
+            dgReservations.IsReadOnly = true;
+
+            // Reset UI buttons
+            btnSauvegarder.IsEnabled = false;
+            btnAjouter.IsEnabled = true;
+            btnModifier.IsEnabled = dgReservations.SelectedItem != null;
+            btnSupprimer.IsEnabled = dgReservations.SelectedItem != null;
+
+            // Clear the edit flag
+            isEditMode = false;
+            editingReservation = null;
+        }
+
+        private void BtnSauvegarder_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // End the current edit on the DataGrid
+                dgReservations.CommitEdit();
+
+                // Get the currently edited reservation
+                if (dgReservations.SelectedItem is Reservation updatedReservation)
+                {
+                    // Update the reservation in the database
+                    ReservationService.Instance.ModifierReservation(updatedReservation);
+
+                    MessageBox.Show("Réservation mise à jour avec succès!",
+                                  "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
+                // Exit edit mode
+                ExitEditMode();
+
+                // Refresh the view
+                dgReservations.Items.Refresh();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la sauvegarde: {ex.Message}",
+                              "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"Exception in BtnSauvegarder_Click: {ex}");
+            }
+        }
+
+        private void DgReservations_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            Debug.WriteLine($"Cell edited: {e.Column.Header}");
         }
 
         private void BtnSupprimer_Click(object sender, RoutedEventArgs e)
@@ -319,7 +436,6 @@ namespace restaurent_hamhamma.Pages
                     try
                     {
                         ReservationService.Instance.SupprimerReservation(selectedReservation.reservation_Id);
-                        // Rafraîchir la vue
                         dgReservations.Items.Refresh();
                     }
                     catch (Exception ex)
@@ -346,7 +462,7 @@ namespace restaurent_hamhamma.Pages
                 {
                     try
                     {
-                        using (OracleConnection conn = new OracleConnection(connectionString))
+                        using (OracleConnection conn = new OracleConnection(_connectionString))
                         {
                             conn.Open();
 

@@ -2,23 +2,42 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-
+using dotenv.net;
 
 namespace restaurent_hamhamma.Pages
 {
     public partial class LoginPage : Page
     {
-        OracleConnection conn = new OracleConnection(@"User Id=Hamhama;Password=1234;Data Source=localhost:1521/XE;Connection Timeout=30");
+        private readonly OracleConnection conn;
 
         public LoginPage()
         {
             InitializeComponent();
+
+            // Load environment variables from .env
+            DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+
+            string user = Environment.GetEnvironmentVariable("DB_USER");
+            string password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+            string host = Environment.GetEnvironmentVariable("DB_HOST");
+            string port = Environment.GetEnvironmentVariable("DB_PORT");
+            string service = Environment.GetEnvironmentVariable("DB_SERVICE");
+
+            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(password) ||
+                string.IsNullOrEmpty(host) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(service))
+            {
+                throw new InvalidOperationException("One or more required environment variables are missing.");
+            }
+
+            string connectionString = $"User Id={user};Password={password};Data Source={host}:{port}/{service};Connection Timeout=30";
+            conn = new OracleConnection(connectionString);
         }
 
         private void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
             string username = UsernameTextBox.Text;
             string password = PasswordBox.Password;
+
             try
             {
                 conn.Open();

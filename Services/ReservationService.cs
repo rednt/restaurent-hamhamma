@@ -6,24 +6,50 @@ using System.Linq;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using System.Diagnostics;
+using dotenv.net;
+using DotNetEnv;
 
 namespace restaurent_hamhamma.Services
+    
 {
+
     public class ReservationService
     {
+        
+
         private static ReservationService _instance;
         private static readonly object _lock = new object();
-        private readonly string _connectionString = @"User Id=Hamhama;Password=1234;Data Source=localhost:1521/XE;Connection Timeout=30";
+        private readonly string _connectionString;
 
         public ObservableCollection<Reservation> Reservations { get; private set; }
 
         private ReservationService()
         {
+            DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+            // Load variables from .env
+
+            string user = Environment.GetEnvironmentVariable("DB_USER");
+            string password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+            string host = Environment.GetEnvironmentVariable("DB_HOST");
+            string port = Environment.GetEnvironmentVariable("DB_PORT");
+            string service = Environment.GetEnvironmentVariable("DB_SERVICE");
+
+            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(password) ||
+                string.IsNullOrEmpty(host) || string.IsNullOrEmpty(port) || string.IsNullOrEmpty(service))
+            {
+                throw new InvalidOperationException("One or more required environment variables are missing.");
+            }
+
+            _connectionString = $"User Id={user};Password={password};Data Source={host}:{port}/{service};Connection Timeout=30";
+
             Reservations = new ObservableCollection<Reservation>();
         }
 
+        
+
         public static ReservationService Instance
         {
+
             get
             {
                 if (_instance == null)
@@ -47,12 +73,12 @@ namespace restaurent_hamhamma.Services
             {
                 Debug.WriteLine("ReservationService: Starting to load reservations from database");
 
-                // Clear the collection but maintain a reference to the same collection
+                
                 Reservations.Clear();
 
                 using (OracleConnection conn = new OracleConnection(_connectionString))
                 {
-                    // Try to connect with timeout handling
+                   
                     try
                     {
                         conn.Open();

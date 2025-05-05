@@ -53,7 +53,7 @@
                 <!-- Reserved for other content -->
             </Grid.ColumnDefinitions>
 
-            <!-- DataGrid - Direct ItemsSource binding, no StaticResource -->
+            <!-- DataGrid - Now with editing capabilities -->
             <DataGrid x:Name="dgReservations"
                 Grid.Column="0"
                 AutoGenerateColumns="False"
@@ -61,15 +61,29 @@
                 SelectionMode="Single"
                 SelectionChanged="DgReservations_SelectionChanged"
                 AlternatingRowBackground="#FFF2E2"
-                Margin="0,0,10,0">
+                Margin="0,0,10,0"
+                CellEditEnding="DgReservations_CellEditEnding">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Client ID" Binding="{Binding ClientID}" Width="50"/>
+                    <DataGridTextColumn Header="Client ID" Binding="{Binding ClientID}" Width="50" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Nom Client" Binding="{Binding Nom}" Width="*"/>
                     <DataGridTextColumn Header="Téléphone" Binding="{Binding Telephone}" Width="*"/>
                     <DataGridTextColumn Header="E-mail" Binding="{Binding Email}" Width="*"/>
                     <DataGridTextColumn Header="Article" Binding="{Binding Choix}" Width="*"/>
-                    <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=dd/MM/yyyy}" Width="*"/>
-                    <DataGridTextColumn Header="Reservation ID" Binding="{Binding reservation_Id}" Width="*"/>
+                    <DataGridTemplateColumn Header="Date" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Date, StringFormat=dd/MM/yyyy}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <DatePicker SelectedDate="{Binding Date, Mode=TwoWay}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Reservation ID" Binding="{Binding reservation_Id}" Width="*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Personnes" Binding="{Binding nbr_Personnes}" Width="*"/>
+                    <DataGridTextColumn Header="Table ID" Binding="{Binding TableId}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -121,6 +135,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="btnAjouter" Content="Ajouter" Padding="15,5" Margin="0,0,10,0" Click="BtnAjouter_Click"/>
                 <Button x:Name="btnModifier" Content="Modifier" Padding="15,5" Margin="10,0" Click="BtnModifier_Click" IsEnabled="False"/>
+                <Button x:Name="btnSauvegarder" Content="Sauvegarder" Padding="15,5" Margin="10,0" Click="BtnSauvegarder_Click" IsEnabled="False"/>
                 <Button x:Name="btnSupprimer" Content="Supprimer" Padding="15,5" Margin="10,0,0,0" Click="BtnSupprimer_Click" IsEnabled="False"/>
             </StackPanel>
         </Border>
