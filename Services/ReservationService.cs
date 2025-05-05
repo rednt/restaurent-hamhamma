@@ -192,7 +192,7 @@ namespace restaurent_hamhamma.Services
                 string query = @"INSERT INTO Client 
                               (client_id, full_name, num_phone, email) 
                               VALUES 
-                              (seq_client.nextval, :name, :phone, :email) 
+                              (seq_user.nextval, :name, :phone, :email) 
                               RETURNING client_id INTO :client_id";
 
                 OracleCommand cmd = new OracleCommand(query, conn);

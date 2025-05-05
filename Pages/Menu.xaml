@@ -66,7 +66,7 @@
                                         <Button 
                             Content="Commander" 
                             Padding="15,5" 
-                            Margin="0,0,10,0"/>
+                            Margin="0,0,10,0" Click="Commander_Click"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>

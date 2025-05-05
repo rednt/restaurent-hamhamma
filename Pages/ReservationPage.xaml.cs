@@ -21,8 +21,7 @@ namespace restaurent_hamhamma.Pages
         public ReservationPage()
         {
             InitializeComponent();
-            LoadData();
-            SetupEventHandlers();
+
             try
             {
                 // Load environment variables from .env file
@@ -45,17 +44,19 @@ namespace restaurent_hamhamma.Pages
                 // Build the connection string using the environment variables
                 _connectionString = $"User Id={user};Password={password};Data Source={host}:{port}/{service};Connection Timeout=30";
 
-                
+                // Important: LoadData est maintenant appelé APRÈS l'initialisation de la chaîne de connexion
+                LoadData();
+                SetupEventHandlers();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error initializing the Admin page: {ex.Message}",
+                MessageBox.Show($"Error initializing the Reservation page: {ex.Message}",
                     "Initialization Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Debug.WriteLine($"Exception in AdminPage constructor: {ex}");
+                Debug.WriteLine($"Exception in ReservationPage constructor: {ex}");
             }
         }
 
-        
+
 
         private void LoadData()
         {
@@ -417,7 +418,7 @@ namespace restaurent_hamhamma.Pages
                 cmd.Parameters.Add(new OracleParameter("choix", _selectedMenuItem.ItemId));
                 cmd.Parameters.Add(new OracleParameter("client_id", clientId));
                 cmd.Parameters.Add(new OracleParameter("table_id", tableId));
-                
+
 
                 cmd.ExecuteNonQuery();
 
