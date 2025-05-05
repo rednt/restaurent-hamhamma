@@ -14,8 +14,7 @@ namespace restaurent_hamhamma.Models
         public DateTime Date { get; set; }
         public string Commentaire { get; set; }
         public string Choix { get; set; }
-        public string ChoixItem { get; set; } // Pour la compatibilité avec le DataGrid
-        public int ID_Reservation { get { return reservation_Id; } } // Pour la compatibilité avec le DataGrid
+       
         public DateTime TimeCreated { get; set; }
         public int ClientID { get; set; }
         public RestaurantTable TableID { get; set; }

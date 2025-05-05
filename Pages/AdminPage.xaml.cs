@@ -7,54 +7,111 @@ using restaurent_hamhamma.Services;
 using restaurent_hamhamma.Models;
 using Oracle.ManagedDataAccess.Client;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace restaurent_hamhamma.Pages
 {
     public partial class AdminPage : Page
     {
-        private CollectionViewSource reservationsViewSource;
-
-        OracleConnection conn = new OracleConnection(@"User Id=Hamhama;Password=1234;Data Source=localhost:1521/XE;Connection Timeout=30");
+        // Make the connection string consistent throughout the application
+        private readonly string connectionString = @"User Id=Hamhama;Password=1234;Data Source=localhost:1521/XE;Connection Timeout=30";
 
         public AdminPage()
         {
             InitializeComponent();
-            LoadMenuItems();
-            LoadReservations(); // Load reservations before binding
+
+            try
+            {
+                // Set up direct binding for DataGrid
+                LoadData();
+
+                // Add placeholder text to form fields
+                SetupFormFields();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error initializing the Admin page: {ex.Message}",
+                    "Initialization Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"Exception in AdminPage constructor: {ex}");
+            }
         }
 
-        private void LoadReservations()
+        private void SetupFormFields()
         {
-            ReservationService.Instance.LoadReservationsFromDatabase();
-
-            reservationsViewSource = new CollectionViewSource();
-            reservationsViewSource.Source = ReservationService.Instance.Reservations;
-            dgReservations.ItemsSource = reservationsViewSource.View;
+            // Add placeholder text
+            txtMenuName.Text = "Nom";
+            txtMenuDescription.Text = "Description";
+            txtMenuPrice.Text = "Prix";
+            txtMenuImagePath.Text = "Chemin de l'image";
+            chkDisponible.IsChecked = true;
         }
 
-        private void DpFilterDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        private void LoadData()
         {
-            ApplyFilters();
+            try
+            {
+                // Ensure ReservationService is initialized and loads data
+                Debug.WriteLine("Loading reservations from database...");
+                ReservationService.Instance.LoadReservationsFromDatabase();
+
+                // Directly bind the DataGrid to the Reservations collection
+                dgReservations.ItemsSource = ReservationService.Instance.Reservations;
+
+                // Also load menu items
+                LoadMenuItems();
+
+                Debug.WriteLine($"Loaded {ReservationService.Instance.Reservations.Count} reservations");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading data: {ex.Message}",
+                    "Data Loading Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"Exception in LoadData: {ex}");
+            }
         }
 
-        private void TxtFilterNom_TextChanged(object sender, TextChangedEventArgs e)
+        // Add Page_Loaded event handler
+        private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            ApplyFilters();
+            Debug.WriteLine("Page_Loaded event fired");
+
+            // Force UI update
+            if (dgReservations.ItemsSource == null)
+            {
+                LoadData();
+            }
+            else
+            {
+                // Refresh just in case
+                dgReservations.Items.Refresh();
+            }
         }
 
-        private void BtnResetFilter_Click(object sender, RoutedEventArgs e)
+        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            dpFilterDate.SelectedDate = null;
-            txtFilterNom.Text = string.Empty;
-            ApplyFilters();
+            // Clear placeholder text when textbox gets focus
+            if (sender is TextBox textBox)
+            {
+                if (textBox.Text == textBox.Tag?.ToString() ||
+                    (textBox == txtMenuName && textBox.Text == "Nom") ||
+                    (textBox == txtMenuDescription && textBox.Text == "Description") ||
+                    (textBox == txtMenuPrice && textBox.Text == "Prix") ||
+                    (textBox == txtMenuImagePath && textBox.Text == "Chemin de l'image"))
+                {
+                    textBox.Text = string.Empty;
+                }
+            }
         }
+
         private void LoadMenuItems()
         {
             try
             {
-                using (conn)
+                Debug.WriteLine("Loading menu items...");
+                using (OracleConnection conn = new OracleConnection(connectionString))
                 {
                     conn.Open();
+                    Debug.WriteLine("Database connection opened");
 
                     string query = @"SELECT 
                                     item_id, 
@@ -84,28 +141,80 @@ namespace restaurent_hamhamma.Pages
                         });
                     }
 
+                    // Clear and repopulate the MenuItemRepository
+                    MenuItemRepository.Items.Clear();
+                    foreach (var item in menuItems)
+                    {
+                        MenuItemRepository.Items.Add(item);
+                    }
+
+                    // Update the UI
+                    lbMenuItems.ItemsSource = null;
                     lbMenuItems.ItemsSource = MenuItemRepository.Items;
 
-                    // Mettre à jour repository (pour l'admin)
-                    if (MenuItemRepository.Items.Count == 0)
-                    {
-                        foreach (var item in menuItems)
-                        {
-                            MenuItemRepository.Items.Add(item);
-                        }
-                    }
+                    Debug.WriteLine($"Loaded {menuItems.Count} menu items");
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Erreur lors du chargement des menus: " + ex.Message,
                     "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"Exception in LoadMenuItems: {ex}");
             }
         }
+
+        private void DpFilterDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyFilters();
+        }
+
+        private void TxtFilterNom_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyFilters();
+        }
+
+        private void BtnResetFilter_Click(object sender, RoutedEventArgs e)
+        {
+            dpFilterDate.SelectedDate = null;
+            txtFilterNom.Text = string.Empty;
+            ApplyFilters();
+        }
+
+        private void ApplyFilters()
+        {
+            // Create a CollectionView since we're not using CollectionViewSource
+            if (dgReservations.ItemsSource != null)
+            {
+                CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(dgReservations.ItemsSource);
+
+                view.Filter = item =>
+                {
+                    if (item is Reservation reservation)
+                    {
+                        // Filtre par date
+                        if (dpFilterDate.SelectedDate != null && reservation.Date.Date != dpFilterDate.SelectedDate.Value.Date)
+                        {
+                            return false;
+                        }
+
+                        // Filtre par nom
+                        if (!string.IsNullOrWhiteSpace(txtFilterNom.Text) &&
+                            !reservation.Nom.ToLower().Contains(txtFilterNom.Text.ToLower()))
+                        {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                    return false;
+                };
+            }
+        }
+
         private void BtnAjouterMenuItem_Click(object sender, RoutedEventArgs e)
         {
             // Validate input
-            if (string.IsNullOrWhiteSpace(txtMenuName.Text))
+            if (string.IsNullOrWhiteSpace(txtMenuName.Text) || txtMenuName.Text == "Nom")
             {
                 MessageBox.Show("Please enter a name for the menu item.");
                 return;
@@ -120,73 +229,57 @@ namespace restaurent_hamhamma.Pages
             var item = new MenuItemModel
             {
                 Name = txtMenuName.Text,
-                Description = txtMenuDescription.Text,
+                Description = txtMenuDescription.Text == "Description" ? "" : txtMenuDescription.Text,
                 Prix = price,
                 Disponible = chkDisponible.IsChecked == true,
-                ImagePath = txtMenuImagePath.Text
+                ImagePath = txtMenuImagePath.Text == "Chemin de l'image" ? "" : txtMenuImagePath.Text
             };
 
             try
             {
-                conn.Open();
+                using (OracleConnection conn = new OracleConnection(connectionString))
+                {
+                    conn.Open();
 
-                
-                string query = @"INSERT INTO MenuItem 
-                        (item_id, name_item, disponible, description, ImagePath, prix) 
-                        VALUES 
-                        (seq_menuitem.nextval, :name, :disponible, :description, :imagepath, :prix)";
+                    string query = @"INSERT INTO MenuItem 
+                            (item_id, name_item, disponible, description, ImagePath, prix) 
+                            VALUES 
+                            (seq_menuitem.nextval, :name, :disponible, :description, :imagepath, :prix)";
 
-                OracleCommand cmd = new OracleCommand(query, conn);
-                cmd.Parameters.Add(new OracleParameter("name", item.Name));
-                cmd.Parameters.Add(new OracleParameter("disponible", item.Disponible ? 1 : 0)); // Convert boolean to 1/0
-                cmd.Parameters.Add(new OracleParameter("description", item.Description ?? (object)DBNull.Value)); // Handle null values
-                cmd.Parameters.Add(new OracleParameter("imagepath", item.ImagePath ?? (object)DBNull.Value)); // Handle null values
-                cmd.Parameters.Add(new OracleParameter("prix", item.Prix));
+                    OracleCommand cmd = new OracleCommand(query, conn);
+                    cmd.Parameters.Add(new OracleParameter("name", item.Name));
+                    cmd.Parameters.Add(new OracleParameter("disponible", item.Disponible ? 1 : 0)); // Convert boolean to 1/0
+                    cmd.Parameters.Add(new OracleParameter("description", item.Description ?? (object)DBNull.Value)); // Handle null values
+                    cmd.Parameters.Add(new OracleParameter("imagepath", item.ImagePath ?? (object)DBNull.Value)); // Handle null values
+                    cmd.Parameters.Add(new OracleParameter("prix", item.Prix));
 
-                cmd.ExecuteNonQuery();
-                MenuItemRepository.Items.Add(item); 
-                MessageBox.Show("Menu item added successfully!");
+                    cmd.ExecuteNonQuery();
 
-                // Clear form fields
-                txtMenuName.Text = string.Empty;
-                txtMenuPrice.Text = string.Empty;
-                txtMenuDescription.Text = string.Empty;
-                txtMenuImagePath.Text = string.Empty;
-                chkDisponible.IsChecked = true;
+                    // Get the new ID to complete the item
+                    query = "SELECT seq_menuitem.currval FROM dual";
+                    cmd = new OracleCommand(query, conn);
+                    item.ItemId = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    MenuItemRepository.Items.Add(item);
+                    MessageBox.Show("Menu item added successfully!");
+
+                    // Clear form fields
+                    txtMenuName.Text = "Nom";
+                    txtMenuPrice.Text = "Prix";
+                    txtMenuDescription.Text = "Description";
+                    txtMenuImagePath.Text = "Chemin de l'image";
+                    chkDisponible.IsChecked = true;
+
+                    // Refresh the menu items list
+                    lbMenuItems.ItemsSource = null;
+                    lbMenuItems.ItemsSource = MenuItemRepository.Items;
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error: " + ex.Message);
+                Debug.WriteLine($"Exception in BtnAjouterMenuItem_Click: {ex}");
             }
-            finally
-            {
-                conn.Close();
-            }
-        }
-        
-        private void ApplyFilters()
-        {
-            reservationsViewSource.View.Filter = item =>
-            {
-            if (item is Reservation reservation)
-            {
-                    // Filtre par date
-                    if (dpFilterDate.SelectedDate != null && reservation.Date.Date != dpFilterDate.SelectedDate.Value.Date)
-                    {
-                        return false;
-                    }
-
-                    // Filtre par nom
-                    if (!string.IsNullOrWhiteSpace(txtFilterNom.Text) &&
-                        !reservation.Nom.ToLower().Contains(txtFilterNom.Text.ToLower()))
-                    {
-                        return false;
-                    }
-
-                    return true;
-                }
-                return false;
-            };
         }
 
         private void DgReservations_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -195,6 +288,7 @@ namespace restaurent_hamhamma.Pages
             btnModifier.IsEnabled = isItemSelected;
             btnSupprimer.IsEnabled = isItemSelected;
         }
+
         private void BtnAjouter_Click(object sender, RoutedEventArgs e)
         {
             // Naviguer vers la page de réservation pour ajouter une nouvelle réservation
@@ -205,7 +299,6 @@ namespace restaurent_hamhamma.Pages
         {
             if (dgReservations.SelectedItem is Reservation selectedReservation)
             {
-                // Dans une application réelle, on ouvrirait une fenêtre d'édition
                 MessageBox.Show($"Modification de la réservation de {selectedReservation.Nom} en cours de développement.",
                     "Fonctionnalité à venir", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -223,12 +316,22 @@ namespace restaurent_hamhamma.Pages
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    ReservationService.Instance.SupprimerReservation(selectedReservation.reservation_Id);
-                    // Rafraîchir la vue
-                    reservationsViewSource.View.Refresh();
+                    try
+                    {
+                        ReservationService.Instance.SupprimerReservation(selectedReservation.reservation_Id);
+                        // Rafraîchir la vue
+                        dgReservations.Items.Refresh();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error deleting reservation: {ex.Message}",
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Debug.WriteLine($"Exception in BtnSupprimer_Click: {ex}");
+                    }
                 }
             }
         }
+
         private void BtnSupprimerItem_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.DataContext is MenuItemModel item)
@@ -243,48 +346,74 @@ namespace restaurent_hamhamma.Pages
                 {
                     try
                     {
-                        using (conn)
+                        using (OracleConnection conn = new OracleConnection(connectionString))
                         {
                             conn.Open();
 
-                            string query = "DELETE FROM Reservation WHERE reservation_id = :id";
+                            string query = "DELETE FROM MenuItem WHERE item_id = :id";
                             OracleCommand cmd = new OracleCommand(query, conn);
                             cmd.Parameters.Add(new OracleParameter("id", item.ItemId));
 
-                            cmd.ExecuteNonQuery();
+                            int rowsAffected = cmd.ExecuteNonQuery();
+
+                            if (rowsAffected > 0)
+                            {
+                                // Remove from local collection after successful DB deletion
+                                MenuItemRepository.Items.Remove(item);
+
+                                // Refresh UI
+                                lbMenuItems.ItemsSource = null;
+                                lbMenuItems.ItemsSource = MenuItemRepository.Items;
+
+                                MessageBox.Show($"L'article \"{item.Name}\" a été supprimé.",
+                                    "Suppression réussie", MessageBoxButton.OK, MessageBoxImage.Information);
+                            }
+                            else
+                            {
+                                MessageBox.Show($"L'article \"{item.Name}\" n'a pas pu être supprimé.",
+                                    "Erreur de suppression", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            }
                         }
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine("Erreur lors de la suppression de réservation: " + ex.Message);
-                        throw new Exception("Impossible de supprimer la réservation: " + ex.Message);
+                        MessageBox.Show("Erreur lors de la suppression: " + ex.Message,
+                            "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Debug.WriteLine($"Exception in BtnSupprimerItem_Click: {ex}");
                     }
-                    MenuItemRepository.Items.Remove(item);
-
                 }
             }
         }
+
         private void BtnModifierItem_Click(object sender, RoutedEventArgs e)
         {
             // Retrieve the selected menu item
             if (sender is Button button && button.DataContext is MenuItemModel selectedItem)
             {
-                // Open a window to modify the selected item
-                
-                EditMenuItemWindow editWindow = new EditMenuItemWindow(selectedItem);
-                editWindow.ShowDialog();
+                try
+                {
+                    // Open a window to modify the selected item
+                    EditMenuItemWindow editWindow = new EditMenuItemWindow(selectedItem);
+                    bool? result = editWindow.ShowDialog();
 
-                // If the user saved the changes, the repository and database will be updated.
-                // Update the display (in case any changes were made)
-                lbMenuItems.ItemsSource = MenuItemRepository.Items; // Refresh the list
+                    if (result == true)
+                    {
+                        // Refresh the list if changes were made
+                        lbMenuItems.ItemsSource = null;
+                        lbMenuItems.ItemsSource = MenuItemRepository.Items;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error opening edit window: {ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Debug.WriteLine($"Exception in BtnModifierItem_Click: {ex}");
+                }
             }
             else
             {
                 MessageBox.Show("Aucun élément sélectionné.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-
-
     }
 }

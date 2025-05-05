@@ -18,26 +18,6 @@ namespace restaurent_hamhamma.Models
             return Username == username && Password == password;
         }
 
-        public void Logout()
-        {
-            
-        }
-
-        public void AddMenuItem(string name, float prix, bool disponible)
-        {
-            
-        }
-
-        public void UpdateMenuItem(int itemId, float prix, bool disponible, string description)
-        {
-           
-        }
-
-        public void RemoveMenuItem(int itemId)
-        {
-            
-        }
-
         // Navigation properties
         public ICollection<MenuItemModel> MenuItems { get; set; }
     }
